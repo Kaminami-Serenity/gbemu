@@ -1,9 +1,10 @@
 from pathlib import Path
+import pathlib
 import sys
 from hypothesis import given
 import hypothesis.strategies as st
 
-from gbemu.cartridge.cartdrige import read_cartridge_metadata
+from cartridge.cartdrige import read_cartridge_metadata
 
 # Define parameters for hypothesis to create random test data
 HEADER_START = 0x100
@@ -26,13 +27,15 @@ def test_read_random_header_data(data):
 
     # Only tests weather the data was correctly read and parsed into the metadata tuple
     metadata = read_cartridge_metadata(data)
-    assert metadata.title == read(0x134, 14)
+    print(metadata.title)
+    print(read(0x134, 14))
+    assert metadata.title == read(0x134, 15), 'Metadata of title not matching saved metdata and freshly read'
     checksum = read(0x14E, 2)
-    assert metadata.global_checksum == int.from_bytes(checksum, sys.byteorder) 
+    assert metadata.global_checksum == int.from_bytes(checksum, sys.byteorder) , 'global checksum data not the same is freshly read checksum (This not an actual checksum test)'
     
 
 test_read_random_header_data()
 
 # Test function with snake.gb to assert against known values
-p = Path('/home/photon/Workspace/Projects/GBEmu/snake.gb')
-print(read_cartridge_metadata(p.read_bytes()))
+def test_header_with_gb_module(path: str):
+    print(read_cartridge_metadata(Path(path).read_bytes()))

@@ -15,7 +15,7 @@ FIELDS = [
     ("rom_size", 'B'),           # 0x148 (ROM size)
     ("ram_size", 'B'),           # 0x149 (RAM size)
     ("destination_code", "B"),   # 0x14A (destination code)
-    ("old_license_code", 'H'),   # 0x14B (old license code)
+    ("old_license_code", 'B'),   # 0x14B (old license code)
     ("mask_rom_version", 'B'),   # 0x14C (mask rom version)
     ("header_checksum", 'B'),    # 0x14D (header checksum)
     ("global_checksum", 'H')     # 0x14E (global checksum)

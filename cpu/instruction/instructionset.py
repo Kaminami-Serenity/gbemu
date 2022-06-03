@@ -1,11 +1,11 @@
 import json
-from instructionclasses import Instruction
+from cpu.instruction.instructionclasses import Instruction
 
 # Hard path to the json file of opcodes
-PATH_OPCODES_JSON = 'Opcodes.json'
+PATH_OPCODES_JSON = 'cpu/instruction/Opcodes.json'
 
 # Load opcodes.json file -> Parse into dataclasses -> return two dictionaries, one for unprefixed instructions and one for prefixed instructions
-def instantiate_opcodes():
+def load_opcodes():
 
     # Load the opcdoes from json file
     opcodes_json = open(PATH_OPCODES_JSON, 'r')
@@ -14,26 +14,32 @@ def instantiate_opcodes():
 
     # Split json into unprefixed and prefixed 
     unprefixed_opcodes = opcodes_dict.get("unprefixed")
-    prefixed_opcodes_json = opcodes_dict.get("prefixed")
+    prefixed_opcodes = opcodes_dict.get("cbprefixed")
  
     # prepare the two dictionaries that will be returned
-    instructions_unprefixed = dict[{str, Instruction}]
-    instructions_prefixed = dict[{str, Instruction}]
+    instructions_unprefixed: dict[int, Instruction] = {}
+    instructions_prefixed: dict[int, Instruction] = {}
 
     # Parse the json data into Instruction class and save in prepared dictionary
-    for key in unprefixed_opcodes:
+    for code in unprefixed_opcodes:
 
         # add the opcode signature to the value set so it can be included in the Instruction values
-        unprefixed_opcodes.get(key).update({'opcode' : key})
-
-        #print(unprefixed_codes.get(key))
+        unprefixed_opcodes.get(code).update({'opcode' : code})
 
         # Instantiate and parse this instruction
-        instruction_tmp = Instruction(**unprefixed_opcodes.get(key))
-        instructions_unprefixed.update({key : instruction_tmp})
-        
+        instruction_tmp = Instruction(**unprefixed_opcodes.get(code))
+        instructions_unprefixed.update({code : instruction_tmp})
+
+    for code in prefixed_opcodes:
+
+        # add the opcode signature to the value set so it can be included in the Instruction values
+        prefixed_opcodes.get(code).update({'opcode' : code})
+
+        # Instantiate and parse this instruction
+        instruction_tmp = Instruction(**prefixed_opcodes.get(code))
+        instructions_prefixed.update({code : instruction_tmp})
 
         # for k in instructions_unprefixed:
         #     print(instructions_unprefixed.get(k).pretty_string())
 
-        return instructions_unprefixed, instructions_prefixed
+    return instructions_unprefixed, instructions_prefixed

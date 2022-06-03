@@ -1,16 +1,25 @@
-from array import ArrayType
 from dataclasses import dataclass
-from multiprocessing.sharedctypes import Array
+from tokenize import Comment
 from typing import Literal
 
-@dataclass(frozen=True)
+@dataclass()
 class Operand:
 
-    immediate: bool
     name: str
-    bytes: int
-    value: int | None
-    adjust: Literal["+", "-"] | None
+    immediate: bool
+    bytes: int = 0
+    value: int | None = None
+    adjust: Literal["+", "-"] | None = None
+
+    def __init__(self, name: str, immediate: bool, bytes: int = 0, increment: bool = False, decrement: bool = False):
+        self.name = name
+        self.immediate = immediate
+        self.bytes = bytes
+        if(increment):
+            self.adjust = '+'
+        if(decrement):
+            self.adjust = '-'
+        
 
     # create is meant to be run at runtime as a kind of pseuda update for this one instance?!
     def create(self, value):
@@ -23,20 +32,24 @@ class Operand:
         )
 
     def pretty_string(self):
-        return "Name: " + self.name + " Value: " + self.value + "\n" + "Immediate: " + str(self.immediate) + " Bytes: " + self.bytes + " Adjust: " + self.adjust
+        return "Name: " + self.name + " Value: " + str(self.value) + "\n" + "Immediate: " + str(self.immediate) + " Bytes: " + str(self.bytes) + " Adjust: " + str(self.adjust)
 
 @dataclass(frozen=True, eq=True)
-class Flags:
+class Flag_Instruction:
 
-    z: Literal["+", "-"]
-    n: Literal["+", "-"]
-    h: Literal["+", "-"]
-    c: Literal["+", "-"]
+    # "-": flag will not be set
+    # "0": reset after the instruction 
+    # "1": flag is set 
+    # "Z","N", "H", "C": effected as expected by it's function 
+    Z: Literal["Z", "-", "0", "1"]
+    N: Literal["N", "-", "0", "1"]
+    H: Literal["H", "-", "0", "1"]
+    C: Literal["C", "-", "0", "1"]
 
     def pretty_string(self):
-        return "Z: [" + self.z + "] N: [" + self.n + "] H: [" + self.h + "] C: [" + self.c + "]"
+        return "Z: [" + self.Z + "] N: [" + self.N + "] H: [" + self.H + "] C: [" + self.C + "]"
 
-@dataclass(frozen=True, eq=True)
+@dataclass()
 class Instruction:
 
     opcode: int
@@ -45,8 +58,24 @@ class Instruction:
     mnemonic: str
     operands: list[Operand] 
     cycles: list[int]
-    flags: Flags
+    flags: Flag_Instruction
     comment: str = ""
+
+    # update the flags and Operands to actually become the class and not the initialized dictionary - might not work with frozen...
+    def __post_init__(self):
+        # parse the flags string as argument into the Flags dc and resign it to self
+        self.flags = Flag_Instruction(**self.flags)
+        
+        # temporary list for the newly created operands
+        tmp_operands: list[Operand] = []
+        # read each Operand string and parse it into an Operand dc
+        for operand in self.operands:
+            # print(operand)
+            # print("\n")
+            tmp_operands.append(Operand(**operand))
+        # reassign the self operands
+        self.operands = tmp_operands
+
 
     # create is meant to be run at runtime as a kind of pseuda update for this one instance with actual operand values? 
     def create(self, operands):
@@ -57,15 +86,16 @@ class Instruction:
             cycles = self.cycles,
             bytes = self.bytes,
             mnemonic = self.mnemonic,
-            flags = self.flags
+            flags = self.flags,
+            comment = self.comment
         )
 
     def pretty_string(self):
 
         operand_string = ""
 
-        #for op in self.operands:
+        for op in self.operands:
 
-            #operand_string += op.__repr__ + "\n"
+            operand_string += op.pretty_string() + "\n"
 
-        return "Mnemonic: " + self.mnemonic + " - " + "Opcode: " + self.opcode + "\n" + operand_string + "Immediate: " + str(self.immediate )+ "Cycles: " + str(self.cycles)[1:-1] #+ " Bytes: " + bytes + "\n" + "Flags: " + self.flags.pretty_string() + "\n" + "Comments: " + self.comments + "\n"
+        return "Mnemonic: " + self.mnemonic + " - " + "Opcode: " + self.opcode + "\n" + operand_string + "Immediate: " + str(self.immediate )+ " - Cycles: " + str(self.cycles)[1:-1] + " Bytes: " + str(self.bytes) + "\n" + "Flags: " + self.flags.pretty_string() + "\n" + "Comments: " + self.comment + "\n"
