@@ -8,6 +8,22 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Run Emulator",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/photon/Workspace/Projects/Git_Repo_GBEmu/gbemu/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Run testcases",
+            "type": "python",
+            "request": "launch",
             "program": "/home/photon/Workspace/Projects/Git_Repo_GBEmu/gbemu/runtests.py",
             "console": "integratedTerminal",
             "justMyCode": true

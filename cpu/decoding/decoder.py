@@ -34,7 +34,7 @@ class Decoder:
 
         if 0 <= address+count <= len(self.data):
             cache: bytes = self.data[address : address+count]
-            return hex(int.from_bytes(cache, sys.byteorder))
+            return int.from_bytes(cache, sys.byteorder)
 
         else:
             raise IndexError(f'{address=}+{count=} is out of range')
@@ -60,17 +60,18 @@ class Decoder:
         
         # Now collect operands and read eventual values from ROM
         for operand in instruction.operands:
-            if operand.bytes is not None:
+            if operand.bytes is not 0:
                 value = self.read(address, operand.bytes)
                 address += operand.bytes
-                new_operands.append(operand.copy(value))
+                operand.set_value(value)
+                new_operands.append(operand)
 
             else: 
                 new_operands.append(operand)
 
         # Create the complete Instruction with operands and actual values
-        decoded_instruction = instruction.copy(operands=new_operands)
+        instruction.update_operands(new_operands)
 
         # Return current address pointer value and the Instruction
-        return address, decoded_instruction
+        return address, instruction
 

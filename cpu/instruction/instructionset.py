@@ -28,7 +28,7 @@ def load_opcodes():
 
         # Instantiate and parse this instruction
         instruction_tmp = Instruction(**unprefixed_opcodes.get(code))
-        instructions_unprefixed.update({code : instruction_tmp})
+        instructions_unprefixed.update({int(code, 0) : instruction_tmp})
 
     for code in prefixed_opcodes:
 
@@ -37,7 +37,7 @@ def load_opcodes():
 
         # Instantiate and parse this instruction
         instruction_tmp = Instruction(**prefixed_opcodes.get(code))
-        instructions_prefixed.update({code : instruction_tmp})
+        instructions_prefixed.update({int(code, 0) : instruction_tmp})
 
         # for k in instructions_unprefixed:
         #     print(instructions_unprefixed.get(k).pretty_string())

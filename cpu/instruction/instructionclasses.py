@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from tokenize import Comment
 from typing import Literal
 
 @dataclass()
@@ -19,15 +18,18 @@ class Operand:
             self.adjust = '+'
         if(decrement):
             self.adjust = '-'
-        
+    
+
+    def set_value(self, value):
+        value = value
 
     # create is meant to be run at runtime as a kind of pseuda update for this one instance?!
-    def create(self, value):
+    def create(self, new_value):
         return Operand(
             immediate = self.immediate,
             name = self.name,
             bytes= self.bytes,
-            value = value,
+            value = new_value,
             adjust = self.adjust
         )
 
@@ -35,7 +37,7 @@ class Operand:
         return "Name: " + self.name + " Value: " + str(self.value) + "\n" + "Immediate: " + str(self.immediate) + " Bytes: " + str(self.bytes) + " Adjust: " + str(self.adjust)
 
 @dataclass(frozen=True, eq=True)
-class Flag_Instruction:
+class Flags:
 
     # "-": flag will not be set
     # "0": reset after the instruction 
@@ -58,13 +60,13 @@ class Instruction:
     mnemonic: str
     operands: list[Operand] 
     cycles: list[int]
-    flags: Flag_Instruction
+    flags: Flags
     comment: str = ""
 
     # update the flags and Operands to actually become the class and not the initialized dictionary - might not work with frozen...
     def __post_init__(self):
         # parse the flags string as argument into the Flags dc and resign it to self
-        self.flags = Flag_Instruction(**self.flags)
+        self.flags = Flags(**self.flags)
         
         # temporary list for the newly created operands
         tmp_operands: list[Operand] = []
@@ -75,6 +77,9 @@ class Instruction:
             tmp_operands.append(Operand(**operand))
         # reassign the self operands
         self.operands = tmp_operands
+
+    def update_operands(self, operands):
+        operands = operands,
 
 
     # create is meant to be run at runtime as a kind of pseuda update for this one instance with actual operand values? 
